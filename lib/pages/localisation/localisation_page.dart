@@ -145,13 +145,17 @@ class _LocalisationPageState extends State<LocalisationPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0), // Ajouter un padding autour du bouton
-                    child: FloatingActionButton(
-                      onPressed: _addLocalisation,
-                      backgroundColor: Colors.teal,
-                      child: Icon(Icons.add),
-                    ),
-                  ),
+                  padding: const EdgeInsets.all(16.0),
+  child: Align(
+    alignment: Alignment.bottomRight, // Aligner à droite
+    child: FloatingActionButton(
+      onPressed: _addLocalisation,
+      backgroundColor: Colors.teal,
+      child: Icon(Icons.add),
+    ),
+  ),
+)
+
                 ],
               ),
       ),

@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/localisation.dart';
 
 class LocalisationService {
-  final String baseUrl = 'http://192.168.137.1:8090/api/localisations';
-
+  final String baseUrl = 'http://192.168.1.107:8090/api/localisations';
+// LISTE DES LOCLAISATIONSSS
   Future<List<Localisation>> fetchLocalisations() async {
     final response = await http.get(Uri.parse(baseUrl));
 
@@ -16,7 +16,7 @@ class LocalisationService {
       throw Exception('Failed to load localisations');
     }
   }
-
+// CREER LOCALISATION
   Future<Localisation> createLocalisation(Localisation localisation) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -32,7 +32,7 @@ class LocalisationService {
       throw Exception('Failed to create localisation');
     }
   }
-
+// MODIFIER LOCALISATION
   Future<Localisation> updateLocalisation(int id, Localisation localisation) async {
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
@@ -48,7 +48,7 @@ class LocalisationService {
       throw Exception('Failed to update localisation');
     }
   }
-
+// SUPPRIMER LOCALISATION
   Future<void> deleteLocalisation(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
 

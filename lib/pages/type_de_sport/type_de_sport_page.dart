@@ -40,7 +40,7 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       MaterialPageRoute(builder: (context) => AddTypeDeSportPage()),
     ).then((value) {
       if (value == true) {
-        _fetchData(); // Rafraîchit la liste après l'ajout d'un nouvel élément
+        _fetchData(); // RAFRAICHIRR
       }
     });
   }
@@ -53,7 +53,7 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       ),
     ).then((value) {
       if (value == true) {
-        _fetchData(); // Rafraîchit la liste après la mise à jour d'un élément
+        _fetchData(); // RAFRAICHIRRR LA PAGE
       }
     });
   }
@@ -64,12 +64,8 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       appBar: AppBar(
         title: Text('Types de Sport'),
         backgroundColor: Colors.teal,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: _openAddTypeDeSportPage,
-          ),
-        ],
+        
+        
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

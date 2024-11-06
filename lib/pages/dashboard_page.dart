@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'type_de_sport/type_de_sport_page.dart';
 import 'localisation/localisation_page.dart';
+import 'participant/participant_page.dart'; // Importez votre page de participants
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final List<Widget> _pages = [
     TypeDeSportPage(),
     LocalisationPage(),
+    ParticipantPage(), // Ajoutez la page des participants ici
   ];
 
   void _onItemTapped(int index) {
@@ -28,7 +30,7 @@ class _DashboardPageState extends State<DashboardPage> {
         title: Text('Planification Evenements Sportifs'),
         backgroundColor: Colors.teal,
       ),
-      body: _pages[_selectedIndex], // Affiche la page sélectionnée
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -38,6 +40,10 @@ class _DashboardPageState extends State<DashboardPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.location_on),
             label: 'Localisation',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people), // Icône pour les participants
+            label: 'Participants',
           ),
         ],
         currentIndex: _selectedIndex,

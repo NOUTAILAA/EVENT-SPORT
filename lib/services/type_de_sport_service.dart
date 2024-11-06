@@ -4,8 +4,8 @@ import 'dart:convert';
 import '../models/type_de_sport.dart';
 
 class TypeDeSportService {
-  final String baseUrl = 'http://192.168.137.1:8090/typesport';
-
+  final String baseUrl = 'http://192.168.1.107:8090/typesport';
+// LISTE DES TYPES DE SPORTS
   Future<List<TypeDeSport>> fetchTypesDeSport() async {
     final response = await http.get(Uri.parse('$baseUrl/liste'));
 
@@ -16,6 +16,7 @@ class TypeDeSportService {
       throw Exception('Failed to load types de sport');
     }
   }
+  // AJOUTER LISTE DES TYPES DE SPORT
   Future<void> createTypeDeSport(TypeDeSport typeDeSport) async {
     final response = await http.post(
       Uri.parse('$baseUrl/creer'), // Mettez l'URL appropriée pour ajouter un type de sport
@@ -29,6 +30,7 @@ class TypeDeSportService {
       throw Exception('Failed to create type de sport');
     }
   }
+  // MODIFIERRRR TYPE DE SPORT 
   Future<void> updateTypeDeSport(TypeDeSport typeDeSport) async {
   final response = await http.put(
     Uri.parse('$baseUrl/mettreajour/${typeDeSport.id}'),

@@ -4,7 +4,7 @@ import 'dart:convert';
 import '../models/type_de_sport.dart';
 
 class TypeDeSportService {
-  final String baseUrl = 'http://192.168.1.107:8090/typesport';
+  final String baseUrl = 'http://192.168.137.1:8090/typesport';
 
   Future<List<TypeDeSport>> fetchTypesDeSport() async {
     final response = await http.get(Uri.parse('$baseUrl/liste'));

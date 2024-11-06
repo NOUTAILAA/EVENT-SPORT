@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/localisation.dart';
 
 class LocalisationService {
-  final String baseUrl = 'http://192.168.1.107:8090/api/localisations';
+  final String baseUrl = 'http://192.168.137.1:8090/api/localisations';
 
   Future<List<Localisation>> fetchLocalisations() async {
     final response = await http.get(Uri.parse(baseUrl));

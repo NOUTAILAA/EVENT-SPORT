@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'type_de_sport/type_de_sport_page.dart';
 import 'localisation/localisation_page.dart';
-import 'participant/participant_page.dart'; // Importez votre page de participants
+import 'participant/participant_page.dart';
+import 'event/event_page.dart'; // Import the events page
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -11,10 +12,12 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
+  // Add EvenementsPage to the list of pages
   final List<Widget> _pages = [
     TypeDeSportPage(),
     LocalisationPage(),
-    ParticipantPage(), // Ajoutez la page des participants ici
+    ParticipantPage(),
+    EvenementsPage(), // Include the events page here
   ];
 
   void _onItemTapped(int index) {
@@ -42,8 +45,12 @@ class _DashboardPageState extends State<DashboardPage> {
             label: 'Localisation',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.people), // Icône pour les participants
+            icon: Icon(Icons.people),
             label: 'Participants',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event), // Add an icon for the events
+            label: 'Événements',
           ),
         ],
         currentIndex: _selectedIndex,

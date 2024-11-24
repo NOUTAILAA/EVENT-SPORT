@@ -20,6 +20,16 @@ class Localisation {
     );
   }
 
+  /// Placeholder or default instance
+  factory Localisation.placeholder() {
+    return Localisation(
+      id: 0,
+      ville: "Unknown City",
+      adresse: "Unknown Address",
+      pays: "Unknown Country",
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

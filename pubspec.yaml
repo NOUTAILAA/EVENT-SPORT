@@ -39,6 +39,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  google_maps_flutter: ^2.0.6
+  flutter_map: ^0.13.0 # Vérifiez la dernière version
+  latlong2: ^0.8.1 # 
   http: ^0.13.5  # ou la dernière version disponible
 
   # The "flutter_lints" package below contains a set of recommended lints to

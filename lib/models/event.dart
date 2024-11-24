@@ -4,6 +4,7 @@ class Evenement {
   final int localisationId;
   final int typeDeSportId;
   final double prix;
+  final String date; // Add the date field
 
   Evenement({
     required this.id,
@@ -11,6 +12,7 @@ class Evenement {
     required this.localisationId,
     required this.typeDeSportId,
     required this.prix,
+    required this.date, // Include the date field
   });
 
   factory Evenement.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Evenement {
       localisationId: json['localisationId'],
       typeDeSportId: json['typeDeSportId'],
       prix: json['prix'].toDouble(),
+      date: json['date'], // Parse the date field
     );
   }
 
@@ -30,6 +33,7 @@ class Evenement {
       'localisationId': localisationId,
       'typeDeSportId': typeDeSportId,
       'prix': prix,
+      'date': date, // Include the date field in serialization
     };
   }
 }

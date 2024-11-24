@@ -56,6 +56,7 @@ class EvenementDetailsPage extends StatelessWidget {
             final data = snapshot.data!;
             final equipes = data['equipes'] as List<dynamic>? ?? [];
             final resultats = data['resultats'] as List<dynamic>? ?? [];
+            final eventDate = data['date'] ?? 'Date non disponible'; // Fetch the date
 
             return SingleChildScrollView(
               child: Padding(
@@ -81,6 +82,10 @@ class EvenementDetailsPage extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 8),
+                            Text(
+                              'Date: $eventDate',
+                              style: TextStyle(fontSize: 18, color: Colors.teal[600]),
+                            ),
                             Text(
                               'Type de Sport: $typeDeSportName',
                               style: TextStyle(fontSize: 18, color: Colors.teal[600]),

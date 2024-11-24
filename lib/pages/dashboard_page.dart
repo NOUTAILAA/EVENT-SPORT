@@ -55,6 +55,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.black, // Change unselected items to black
         onTap: _onItemTapped,
       ),
     );

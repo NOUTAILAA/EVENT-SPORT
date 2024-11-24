@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/event.dart';
 import '../../services/event_service.dart';
-
+import '../../services/participant_service.dart';
+import '../../models/participant.dart';
 class EvenementDetailsPage extends StatelessWidget {
   final Evenement evenement;
   final String typeDeSportName;
@@ -13,6 +14,77 @@ class EvenementDetailsPage extends StatelessWidget {
     required this.typeDeSportName,
     required this.localisationName,
   }) : super(key: key);
+
+void _addParticipant(BuildContext context, int evenementId) async {
+  final participantService = ParticipantService();
+
+  // Récupérer les participants
+  final participants = await participantService.fetchParticipants();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      Participant? selectedParticipant;
+
+      return AlertDialog(
+        title: Text('Sélectionner un Participant'),
+        content: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DropdownButton<Participant>(
+              value: selectedParticipant,
+              hint: Text("Choisissez un participant"),
+              items: participants.map((participant) {
+                return DropdownMenuItem<Participant>(
+                  value: participant,
+                  child: Text(participant.name), // Utilise `name` de `Participant`
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedParticipant = value!;
+                });
+              },
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (selectedParticipant != null) {
+                _registerParticipant(context, evenementId, selectedParticipant!.id);
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Veuillez sélectionner un participant')),
+                );
+              }
+            },
+            child: Text('Ajouter'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+  void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
+    final service = EvenementService();
+    try {
+      await service.inscrireParticipant(evenementId, participantId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Participant ajouté avec succès')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de l\'ajout du participant')),
+      );
+    }
+  }
 
   Future<Map<String, dynamic>> fetchEventDetails(BuildContext context) async {
     final service = EvenementService();
@@ -56,7 +128,7 @@ class EvenementDetailsPage extends StatelessWidget {
             final data = snapshot.data!;
             final equipes = data['equipes'] as List<dynamic>? ?? [];
             final resultats = data['resultats'] as List<dynamic>? ?? [];
-            final eventDate = data['date'] ?? 'Date non disponible'; // Fetch the date
+            final eventDate = data['date'] ?? 'Date non disponible';
 
             return SingleChildScrollView(
               child: Padding(
@@ -64,7 +136,7 @@ class EvenementDetailsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event Title
+                    // Event Details
                     Card(
                       color: Colors.teal[50],
                       elevation: 4,
@@ -102,9 +174,9 @@ class EvenementDetailsPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(height: 24),
+                    SizedBox(height: 16),
 
-                    // Teams and Participants
+                    // Teams and Participants Section
                     Text(
                       'Équipes et Participants:',
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -127,37 +199,25 @@ class EvenementDetailsPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.group, color: Colors.teal, size: 24),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Équipe ID: $equipeId',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.teal[700],
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'Équipe ID: $equipeId',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.teal[700],
+                                ),
                               ),
                               SizedBox(height: 8),
                               ...participants.map((participant) {
                                 final participantName = participant['name'];
                                 return Padding(
                                   padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.person, size: 18, color: Colors.grey[700]),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        participantName ?? 'Nom inconnu',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                    ],
+                                  child: Text(
+                                    participantName ?? 'Nom inconnu',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[700],
+                                    ),
                                   ),
                                 );
                               }).toList(),
@@ -166,66 +226,17 @@ class EvenementDetailsPage extends StatelessWidget {
                         ),
                       );
                     }).toList(),
-
-                    SizedBox(height: 24),
-
-                    // Results
-                    Text(
-                      'Résultats:',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    Divider(thickness: 2, color: Colors.teal),
                     SizedBox(height: 16),
-
-                    if (resultats.isEmpty)
-                      Text(
-                        'Aucun résultat disponible.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      )
-                    else
-                      ...resultats.map((resultat) {
-                        final equipeId = resultat['equipeId'];
-                        final participantId = resultat['participantId'];
-                        final nombreButs = resultat['nombreButs'];
-                        final temps = resultat['temps'];
-
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 8),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  equipeId != null
-                                      ? 'Équipe ID: $equipeId'
-                                      : 'Participant ID: $participantId',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.teal[700],
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                if (nombreButs != null)
-                                  Text(
-                                    'Nombre de buts: $nombreButs',
-                                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                                  ),
-                                if (temps != null)
-                                  Text(
-                                    'Temps: ${temps.toStringAsFixed(2)} secondes',
-                                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                    // Button to Add Participant
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () => _addParticipant(context, evenement.id),
+                        child: Text('Ajouter un participant'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -58,5 +58,14 @@ Future<void> creerEvenement(Map<String, dynamic> evenementData) async {
     throw Exception('Erreur lors de la création de l\'événement');
   }
 }
+Future<void> inscrireParticipant(int evenementId, int participantId) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/evenements/$evenementId/inscrire/$participantId'),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Erreur lors de l\'inscription du participant');
+  }
+}
 
 }

@@ -47,5 +47,16 @@ class EvenementService {
     throw Exception('Failed to load event details');
   }
 }
+Future<void> creerEvenement(Map<String, dynamic> evenementData) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/evenements/creer'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode(evenementData),
+  );
+
+  if (response.statusCode != 201) {
+    throw Exception('Erreur lors de la création de l\'événement');
+  }
+}
 
 }

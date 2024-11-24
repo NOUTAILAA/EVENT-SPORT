@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/event.dart'; // Adjust the import path
 import '../../services/event_service.dart'; // Adjust the import path
 import './event_details_page.dart'; // Import the details page
+import './ajouter_event_page.dart'; // Import the add event page
 
 class EvenementsPage extends StatefulWidget {
   @override
@@ -70,7 +71,6 @@ class _EvenementsPageState extends State<EvenementsPage> {
                                   evenement: evenement,
                                   typeDeSportName: typeDeSportName,
                                   localisationName: localisationName,
-                                  
                                 ),
                               ),
                             );
@@ -86,7 +86,19 @@ class _EvenementsPageState extends State<EvenementsPage> {
                     alignment: Alignment.bottomRight,
                     child: FloatingActionButton(
                       onPressed: () {
-                        // Add event logic here
+                        // Navigate to AddEventPage
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AjouterEvenementPage(),
+                          ),
+                        ).then((value) {
+                          // Refresh the event list after adding a new event
+                          setState(() {
+                            final service = EvenementService();
+                            futureEvenements = service.fetchEvenements();
+                          });
+                        });
                       },
                       backgroundColor: Colors.teal,
                       child: Icon(Icons.add),

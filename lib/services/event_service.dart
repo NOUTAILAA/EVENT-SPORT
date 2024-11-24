@@ -38,5 +38,14 @@ class EvenementService {
       throw Exception('Failed to load localisation names');
     }
   }
-  
+  Future<Map<String, dynamic>> fetchEvenementDetails(int evenementId) async {
+  final response = await http.get(Uri.parse('$baseUrl/evenements/$evenementId'));
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body) as Map<String, dynamic>;
+  } else {
+    throw Exception('Failed to load event details');
+  }
+}
+
 }

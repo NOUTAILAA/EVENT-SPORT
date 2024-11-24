@@ -13,17 +13,22 @@ class Participant {
     required this.password,
   });
 
-  factory Participant.fromJson(Map<String, dynamic> json) {
-    return Participant(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      telephone: json['telephone'] is String
-          ? int.tryParse(json['telephone']) ?? 0
-          : json['telephone'],
-      password: json['password'],
-    );
-  }
+factory Participant.fromJson(Map<String, dynamic> json) {
+  return Participant(
+    id: json['id'] ?? 0,
+    name: json['name'] ?? '',
+    email: json['email'] ?? '',
+    telephone: json.containsKey('telephone')
+        ? (json['telephone'] is String
+            ? int.tryParse(json['telephone']) ?? 0
+            : json['telephone'] ?? 0)
+        : 0,
+    password: json['password'] ?? '',
+  );
+}
+
+
+
 
   Map<String, dynamic> toJson() {
     return {

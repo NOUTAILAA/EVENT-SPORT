@@ -6,16 +6,27 @@ class ParticipantService {
   final String baseUrl = 'http://192.168.1.107:8090/participants';  // Assurez-vous que l'API est bien sur ce port
 
   // Fonction pour récupérer tous les participants
-  Future<List<Participant>> fetchParticipants() async {
-    final response = await http.get(Uri.parse('$baseUrl/liste'));  // L'endpoint correct pour la liste des participants
+Future<List<Participant>> fetchParticipants() async {
+  final response = await http.get(Uri.parse('$baseUrl/listeSimple'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
+  // Affiche la réponse brute pour vérifier le contenu
+  print('Réponse brute : ${response.body}');
+
+  if (response.statusCode == 200) {
+    try {
+      List<dynamic> data = json.decode(response.body); // Décoder la réponse JSON
+      print('Données décodées : $data'); // Affiche les données après décodage
       return data.map((json) => Participant.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load participants');
+    } catch (e) {
+      print('Erreur lors du parsing des données : $e'); // Identifie le problème exact
+      throw Exception('Erreur lors du parsing des participants : $e');
     }
+  } else {
+    throw Exception('Échec du chargement des participants avec code ${response.statusCode}');
   }
+}
+
+
 
   // Fonction pour ajouter un participant
   Future<void> createParticipant(Participant participant) async {

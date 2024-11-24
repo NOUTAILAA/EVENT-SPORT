@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../../models/event.dart'; // Adjust the import path based on your project structure
-import '../../services/event_service.dart'; // Adjust the import path based on your project structure
+import '../../models/event.dart'; // Adjust the import path
+import '../../services/event_service.dart'; // Adjust the import path
+import './event_details_page.dart'; // Import the details page
 
 class EvenementsPage extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class _EvenementsPageState extends State<EvenementsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Liste des Événements'),
-        backgroundColor: Colors.teal, // Same color as LocalisationPage
+        backgroundColor: Colors.teal,
       ),
       body: FutureBuilder(
         future: Future.wait([
@@ -61,6 +61,20 @@ class _EvenementsPageState extends State<EvenementsPage> {
                           title: Text(evenement.nom),
                           subtitle: Text('$typeDeSportName - $localisationName'),
                           trailing: Icon(Icons.event, color: Colors.teal),
+                          onTap: () {
+                            // Navigate to the details page
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EvenementDetailsPage(
+                                  evenement: evenement,
+                                  typeDeSportName: typeDeSportName,
+                                  localisationName: localisationName,
+                                  
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },

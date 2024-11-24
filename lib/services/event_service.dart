@@ -38,4 +38,5 @@ class EvenementService {
       throw Exception('Failed to load localisation names');
     }
   }
+  
 }

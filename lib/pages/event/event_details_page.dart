@@ -3,10 +3,10 @@ import '../../models/event.dart';
 import '../../services/event_service.dart';
 import '../../services/participant_service.dart';
 import '../../models/participant.dart';
-import 'dart:convert'; // Pour json.decode
-import 'package:http/http.dart' as http; // Pour http.Response
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class EvenementDetailsPage extends StatelessWidget {
+class EvenementDetailsPage extends StatefulWidget {
   final Evenement evenement;
   final String typeDeSportName;
   final String localisationName;
@@ -18,12 +18,41 @@ class EvenementDetailsPage extends StatelessWidget {
     required this.localisationName,
   }) : super(key: key);
 
-  /// Afficher la liste des participants et permettre de sélectionner un participant
+  @override
+  _EvenementDetailsPageState createState() => _EvenementDetailsPageState();
+}
+
+class _EvenementDetailsPageState extends State<EvenementDetailsPage> {
+  late Map<String, dynamic> eventDetails;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventDetails();
+  }
+
+  Future<void> _loadEventDetails() async {
+    try {
+      final details = await EvenementService().fetchEvenementDetails(widget.evenement.id);
+      setState(() {
+        eventDetails = details;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors du chargement des détails: ${e.toString()}')),
+      );
+    }
+  }
+
   void _addParticipant(BuildContext context, int evenementId) async {
     final participantService = ParticipantService();
 
     try {
-      // Récupérer la liste des participants
       final participants = await participantService.fetchParticipants();
 
       showDialog(
@@ -41,7 +70,7 @@ class EvenementDetailsPage extends StatelessWidget {
                   items: participants.map((participant) {
                     return DropdownMenuItem<Participant>(
                       value: participant,
-                      child: Text(participant.name), // Afficher le nom du participant
+                      child: Text(participant.name),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -81,11 +110,11 @@ class EvenementDetailsPage extends StatelessWidget {
     }
   }
 
-  /// Enregistrer un participant sélectionné pour cet événement
   void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
     final service = EvenementService();
     try {
       await service.inscrireParticipant(evenementId, participantId);
+      _loadEventDetails(); // Refresh event details
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Participant ajouté avec succès')),
       );
@@ -96,33 +125,34 @@ class EvenementDetailsPage extends StatelessWidget {
     }
   }
 
-  /// Charger les détails de l'événement
-  Future<Map<String, dynamic>> fetchEventDetails(BuildContext context) async {
-    final service = EvenementService();
-    return await service.fetchEvenementDetails(evenement.id);
-  }
-
   Widget _buildResultsSection(List<dynamic> resultats) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Résultats:',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        Divider(thickness: 2, color: Colors.teal),
-        ...resultats.map((resultat) {
-          return Card(
-            elevation: 2,
-            child: ListTile(
-              title: Text('Équipe: ${resultat['equipeId']} '),
-              trailing: Text('Buts: ${resultat['nombreButs'] ?? 'N/A'}, Temps: ${resultat['temps']?.toStringAsFixed(2) ?? 'N/A'}'),
-            ),
-          );
-        }).toList(),
-      ],
-    );
-  }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'Résultats:',
+        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      ),
+      Divider(thickness: 2, color: Colors.teal),
+      ...resultats.map((resultat) {
+        // Formater le texte pour les buts et le temps seulement s'ils ne sont pas 'N/A'
+        var butsText = (resultat['nombreButs'] != null && resultat['nombreButs'] != 'N/A') ? 'Buts: ${resultat['nombreButs']}' : '';
+        var tempsText = (resultat['temps'] != null && resultat['temps'] != 'N/A') ? 'Temps: ${resultat['temps'].toStringAsFixed(2)}' : '';
+        // Combinez les textes, en omettant les champs 'N/A'
+        var displayText = [butsText, tempsText].where((text) => text.isNotEmpty).join(', ');
+
+        return Card(
+          elevation: 2,
+          child: ListTile(
+            title: Text('Équipe: ${resultat['equipeId']}'),
+            trailing: Text(displayText.isNotEmpty ? displayText : 'Aucune donnée'),
+          ),
+        );
+      }).toList(),
+    ],
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -131,45 +161,14 @@ class EvenementDetailsPage extends StatelessWidget {
         title: Text('Détails de l\'événement'),
         backgroundColor: Colors.teal,
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchEventDetails(context),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error, color: Colors.red, size: 50),
-                  SizedBox(height: 8),
-                  Text(
-                    'Erreur: ${snapshot.error}',
-                    style: TextStyle(fontSize: 16, color: Colors.red),
-                  ),
-                ],
-              ),
-            );
-          } else if (!snapshot.hasData) {
-            return Center(
-              child: Text(
-                'Aucune donnée disponible',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            );
-          } else {
-            final data = snapshot.data!;
-            final equipes = data['equipes'] as List<dynamic>? ?? [];
-            final resultats = data['resultats'] as List<dynamic>? ?? [];
-            final eventDate = data['date'] ?? 'Date non disponible';
-
-            return SingleChildScrollView(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event Details
                     Card(
                       color: Colors.teal[50],
                       elevation: 4,
@@ -179,7 +178,7 @@ class EvenementDetailsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              evenement.nom,
+                              widget.evenement.nom,
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -188,19 +187,19 @@ class EvenementDetailsPage extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Date: $eventDate',
+                              'Date: ${eventDetails['date'] ?? 'Date non disponible'}',
                               style: TextStyle(fontSize: 18, color: Colors.teal[600]),
                             ),
                             Text(
-                              'Type de Sport: $typeDeSportName',
+                              'Type de Sport: ${widget.typeDeSportName}',
                               style: TextStyle(fontSize: 18, color: Colors.teal[600]),
                             ),
                             Text(
-                              'Localisation: $localisationName',
+                              'Localisation: ${widget.localisationName}',
                               style: TextStyle(fontSize: 18, color: Colors.teal[600]),
                             ),
                             Text(
-                              'Prix: ${evenement.prix.toStringAsFixed(2)} €',
+                              'Prix: ${widget.evenement.prix.toStringAsFixed(2)} €',
                               style: TextStyle(fontSize: 18, color: Colors.teal[600]),
                             ),
                           ],
@@ -208,65 +207,53 @@ class EvenementDetailsPage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16),
-                    // Teams and Participants Section
-                    Text(
-                      'Équipes et Participants:',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    Divider(thickness: 2, color: Colors.teal),
-                    SizedBox(height: 16),
-                    ...equipes.map((equipe) {
-                      final equipeId = equipe['equipeId'];
-                      final participants = equipe['participants'] as List<dynamic>? ?? [];
-
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Équipe $equipeId',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.teal[700],
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              ...participants.map((participant) {
-                                final participantName = participant['name'];
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
-                                  child: Text(
-                                    participantName ?? 'Nom inconnu',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ],
+                    if (eventDetails.containsKey('equipes'))
+                      ...eventDetails['equipes'].map<Widget>((equipe) {
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Équipe ${equipe['equipeId']}',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal[700],
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                ...equipe['participants'].map<Widget>((participant) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
+                                    child: Text(
+                                      participant['name'],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     // Results Section
-                    if (resultats.isNotEmpty) ...[
-                      SizedBox(height: 16),
-                      _buildResultsSection(resultats),
-                    ],
+                    if (eventDetails.containsKey('resultats') && eventDetails['resultats'].isNotEmpty)
+                      _buildResultsSection(eventDetails['resultats']),
                     SizedBox(height: 16),
                     // Button to Add Participant
                     Center(
                       child: ElevatedButton(
-                        onPressed: () => _addParticipant(context, evenement.id),
+                        onPressed: () => _addParticipant(context, widget.evenement.id),
                         child: Text('Ajouter un participant'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
@@ -276,10 +263,7 @@ class EvenementDetailsPage extends StatelessWidget {
                   ],
                 ),
               ),
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }

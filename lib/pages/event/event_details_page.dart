@@ -3,6 +3,7 @@ import '../../models/event.dart';
 import '../../services/event_service.dart';
 import '../../services/participant_service.dart';
 import '../../models/participant.dart';
+import 'dart:convert'; // Pour json.decode
 import 'package:http/http.dart' as http; // Pour http.Response
 
 class EvenementDetailsPage extends StatelessWidget {
@@ -81,36 +82,46 @@ class EvenementDetailsPage extends StatelessWidget {
   }
 
   /// Enregistrer un participant sélectionné pour cet événement
- void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
-  final service = EvenementService();
-  try {
-    await service.inscrireParticipant(evenementId, participantId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Participant ajouté avec succès')),
-    );
-  } catch (e) {
-    if (e is http.ClientException) {
+  void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
+    final service = EvenementService();
+    try {
+      await service.inscrireParticipant(evenementId, participantId);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de connexion : ${e.message}')),
+        SnackBar(content: Text('Participant ajouté avec succès')),
       );
-    } else if (e is Exception) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur inattendue')),
+        SnackBar(content: Text('Erreur: ${e.toString()}')),
       );
     }
   }
-}
-
-
 
   /// Charger les détails de l'événement
   Future<Map<String, dynamic>> fetchEventDetails(BuildContext context) async {
     final service = EvenementService();
     return await service.fetchEvenementDetails(evenement.id);
+  }
+
+  Widget _buildResultsSection(List<dynamic> resultats) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Résultats:',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        Divider(thickness: 2, color: Colors.teal),
+        ...resultats.map((resultat) {
+          return Card(
+            elevation: 2,
+            child: ListTile(
+              title: Text('Équipe: ${resultat['equipeId']} '),
+              trailing: Text('Buts: ${resultat['nombreButs'] ?? 'N/A'}, Temps: ${resultat['temps']?.toStringAsFixed(2) ?? 'N/A'}'),
+            ),
+          );
+        }).toList(),
+      ],
+    );
   }
 
   @override
@@ -197,7 +208,6 @@ class EvenementDetailsPage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16),
-
                     // Teams and Participants Section
                     Text(
                       'Équipes et Participants:',
@@ -205,7 +215,6 @@ class EvenementDetailsPage extends StatelessWidget {
                     ),
                     Divider(thickness: 2, color: Colors.teal),
                     SizedBox(height: 16),
-
                     ...equipes.map((equipe) {
                       final equipeId = equipe['equipeId'];
                       final participants = equipe['participants'] as List<dynamic>? ?? [];
@@ -222,7 +231,7 @@ class EvenementDetailsPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Équipe ID: $equipeId',
+                                'Équipe $equipeId',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -248,6 +257,11 @@ class EvenementDetailsPage extends StatelessWidget {
                         ),
                       );
                     }).toList(),
+                    // Results Section
+                    if (resultats.isNotEmpty) ...[
+                      SizedBox(height: 16),
+                      _buildResultsSection(resultats),
+                    ],
                     SizedBox(height: 16),
                     // Button to Add Participant
                     Center(

@@ -64,8 +64,11 @@ Future<void> inscrireParticipant(int evenementId, int participantId) async {
   );
 
   if (response.statusCode != 200) {
-    throw Exception('Erreur lors de l\'inscription du participant');
+    final responseBody = json.decode(response.body);
+    final errorMessage = responseBody['message'] ?? 'Erreur inconnue';
+    throw Exception(errorMessage); // Transmet l'erreur au niveau supérieur
   }
 }
+
 
 }

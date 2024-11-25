@@ -3,6 +3,8 @@ import '../../models/event.dart';
 import '../../services/event_service.dart';
 import '../../services/participant_service.dart';
 import '../../models/participant.dart';
+import 'package:http/http.dart' as http; // Pour http.Response
+
 class EvenementDetailsPage extends StatelessWidget {
   final Evenement evenement;
   final String typeDeSportName;
@@ -15,77 +17,97 @@ class EvenementDetailsPage extends StatelessWidget {
     required this.localisationName,
   }) : super(key: key);
 
-void _addParticipant(BuildContext context, int evenementId) async {
-  final participantService = ParticipantService();
+  /// Afficher la liste des participants et permettre de sélectionner un participant
+  void _addParticipant(BuildContext context, int evenementId) async {
+    final participantService = ParticipantService();
 
-  // Récupérer les participants
-  final participants = await participantService.fetchParticipants();
-
-  showDialog(
-    context: context,
-    builder: (context) {
-      Participant? selectedParticipant;
-
-      return AlertDialog(
-        title: Text('Sélectionner un Participant'),
-        content: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return DropdownButton<Participant>(
-              value: selectedParticipant,
-              hint: Text("Choisissez un participant"),
-              items: participants.map((participant) {
-                return DropdownMenuItem<Participant>(
-                  value: participant,
-                  child: Text(participant.name), // Utilise `name` de `Participant`
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedParticipant = value!;
-                });
-              },
-            );
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (selectedParticipant != null) {
-                _registerParticipant(context, evenementId, selectedParticipant!.id);
-                Navigator.pop(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Veuillez sélectionner un participant')),
-                );
-              }
-            },
-            child: Text('Ajouter'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-
-  void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
-    final service = EvenementService();
     try {
-      await service.inscrireParticipant(evenementId, participantId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Participant ajouté avec succès')),
+      // Récupérer la liste des participants
+      final participants = await participantService.fetchParticipants();
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          Participant? selectedParticipant;
+
+          return AlertDialog(
+            title: Text('Sélectionner un Participant'),
+            content: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButton<Participant>(
+                  value: selectedParticipant,
+                  hint: Text("Choisissez un participant"),
+                  items: participants.map((participant) {
+                    return DropdownMenuItem<Participant>(
+                      value: participant,
+                      child: Text(participant.name), // Afficher le nom du participant
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedParticipant = value!;
+                    });
+                  },
+                );
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Annuler'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (selectedParticipant != null) {
+                    _registerParticipant(context, evenementId, selectedParticipant!.id);
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Veuillez sélectionner un participant')),
+                    );
+                  }
+                },
+                child: Text('Ajouter'),
+              ),
+            ],
+          );
+        },
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de l\'ajout du participant')),
+        SnackBar(content: Text('Erreur lors du chargement des participants')),
       );
     }
   }
 
+  /// Enregistrer un participant sélectionné pour cet événement
+ void _registerParticipant(BuildContext context, int evenementId, int participantId) async {
+  final service = EvenementService();
+  try {
+    await service.inscrireParticipant(evenementId, participantId);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Participant ajouté avec succès')),
+    );
+  } catch (e) {
+    if (e is http.ClientException) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur de connexion : ${e.message}')),
+      );
+    } else if (e is Exception) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur inattendue')),
+      );
+    }
+  }
+}
+
+
+
+  /// Charger les détails de l'événement
   Future<Map<String, dynamic>> fetchEventDetails(BuildContext context) async {
     final service = EvenementService();
     return await service.fetchEvenementDetails(evenement.id);

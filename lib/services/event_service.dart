@@ -70,5 +70,22 @@ Future<void> inscrireParticipant(int evenementId, int participantId) async {
   }
 }
 
+// Méthode pour ajouter un résultat
+  Future<void> ajouterResultat(int evenementId, int equipeId, int nombreButs, {double? temps}) async {
+    final url = Uri.parse('$baseUrl/api/resultats/ajouter/equipe/$evenementId');
+    final body = {
+      'equipeId': equipeId.toString(),
+      'nombreButs': nombreButs.toString(),
+      if (temps != null) 'temps': temps.toString(),
+    };
 
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body,
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors de l\'ajout du résultat : ${response.body}');
+    }}
 }

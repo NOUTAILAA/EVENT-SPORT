@@ -56,4 +56,28 @@ class LocalisationService {
       throw Exception('Failed to delete localisation');
     }
   }
+
+
+
+Future<List<Map<String, dynamic>>> fetchLocalisationsFormatted() async {
+  final response = await http.get(Uri.parse(baseUrl));
+
+  if (response.statusCode == 200) {
+    List<dynamic> body = json.decode(response.body);
+
+    // Transformez chaque localisation en un Map contenant pays-ville-adresse
+    return body.map((item) {
+      return {
+        'id': item['id'],
+        'pays': item['pays'],
+        'ville': item['ville'],
+        'adresse': item['adresse'],
+      };
+    }).toList();
+  } else {
+    throw Exception('Failed to load localisations');
+  }
+}
+
+
 }

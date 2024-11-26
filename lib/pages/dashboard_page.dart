@@ -3,6 +3,7 @@ import 'type_de_sport/type_de_sport_page.dart';
 import 'localisation/localisation_page.dart';
 import 'participant/participant_page.dart';
 import 'event/event_page.dart'; // Import the events page
+import 'resultat/ajouter_resultat.dart'; // Import the page for adding results
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -12,13 +13,15 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
-  // Add EvenementsPage to the list of pages
+  // Add EvenementsPage and AjouterResultatPage to the list of pages
   final List<Widget> _pages = [
-    TypeDeSportPage(),
-    LocalisationPage(),
-    ParticipantPage(),
-    EvenementsPage(), // Include the events page here
-  ];
+  TypeDeSportPage(),
+  LocalisationPage(),
+  ParticipantPage(),
+  EvenementsPage(),
+  AjouterResultatPage(), // Ajoutez cette page
+];
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -30,7 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Planification Evenements Sportifs'),
+        title: Text('Planification Événements Sportifs'),
         backgroundColor: Colors.teal,
       ),
       body: _pages[_selectedIndex],
@@ -49,8 +52,12 @@ class _DashboardPageState extends State<DashboardPage> {
             label: 'Participants',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.event), // Add an icon for the events
+            icon: Icon(Icons.event),
             label: 'Événements',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_chart),
+            label: 'Résultats', // Add an icon for the results page
           ),
         ],
         currentIndex: _selectedIndex,

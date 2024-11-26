@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import '../../services/event_service.dart';
+import '../../services/localisation_service.dart';
 
 class AjouterEvenementPage extends StatefulWidget {
   @override
@@ -12,7 +13,7 @@ class _AjouterEvenementPageState extends State<AjouterEvenementPage> {
   final _nomController = TextEditingController();
   final _prixController = TextEditingController();
 
-  late Future<Map<int, String>> futureLocalisations;
+  late Future<List<Map<String, dynamic>>> futureLocalisations;
   late Future<Map<int, String>> futureTypesDeSport;
 
   int? _selectedLocalisation;
@@ -22,9 +23,10 @@ class _AjouterEvenementPageState extends State<AjouterEvenementPage> {
   @override
   void initState() {
     super.initState();
-    final service = EvenementService();
-    futureLocalisations = service.fetchLocalisationNames();
-    futureTypesDeSport = service.fetchTypeDeSportNames();
+    final localisationService = LocalisationService();
+    final eventService = EvenementService();
+    futureLocalisations = localisationService.fetchLocalisationsFormatted();
+    futureTypesDeSport = eventService.fetchTypeDeSportNames();
   }
 
   Future<void> _submitForm() async {
@@ -86,32 +88,39 @@ class _AjouterEvenementPageState extends State<AjouterEvenementPage> {
               SizedBox(height: 16),
 
               // Localisation
-              FutureBuilder<Map<int, String>>(
-                future: futureLocalisations,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  final localisations = snapshot.data!;
-                  return DropdownButtonFormField<int>(
-                    value: _selectedLocalisation,
-                    decoration: InputDecoration(labelText: 'Localisation'),
-                    items: localisations.entries.map((entry) {
-                      return DropdownMenuItem<int>(
-                        value: entry.key,
-                        child: Text(entry.value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedLocalisation = value;
-                      });
-                    },
-                    validator: (value) =>
-                        value == null ? 'Veuillez sélectionner une localisation' : null,
-                  );
-                },
-              ),
+             FutureBuilder<List<Map<String, dynamic>>>(
+  future: futureLocalisations,
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return Center(child: Text('Erreur: ${snapshot.error}'));
+    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      return Center(child: Text('Aucune localisation trouvée'));
+    }
+
+    final localisations = snapshot.data!;
+    return DropdownButtonFormField<int>(
+      value: _selectedLocalisation,
+      decoration: InputDecoration(labelText: 'Localisation'),
+      items: localisations.map((localisation) {
+        return DropdownMenuItem<int>(
+          value: localisation['id'],
+          child: Text(
+              '${localisation['pays']}-${localisation['ville']}-${localisation['adresse']}'),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedLocalisation = value;
+        });
+      },
+      validator: (value) =>
+          value == null ? 'Veuillez sélectionner une localisation' : null,
+    );
+  },
+),
+
               SizedBox(height: 16),
 
               // Type de sport

@@ -3,8 +3,7 @@ import '../../models/event.dart';
 import '../../services/event_service.dart';
 import '../../services/participant_service.dart';
 import '../../models/participant.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 
 class EvenementDetailsPage extends StatefulWidget {
   final Evenement evenement;

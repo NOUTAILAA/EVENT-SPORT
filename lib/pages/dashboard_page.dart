@@ -57,7 +57,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_chart),
-            label: 'Résultats', // Add an icon for the results page
+            label: 'Résultats',
           ),
         ],
         currentIndex: _selectedIndex,

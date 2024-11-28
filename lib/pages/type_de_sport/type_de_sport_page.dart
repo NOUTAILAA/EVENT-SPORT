@@ -3,6 +3,7 @@ import '../../services/type_de_sport_service.dart';
 import '../../models/type_de_sport.dart';
 import 'add_type_de_sport_page.dart';
 import 'update_type_de_sport_page.dart'; // Importez la page de mise à jour
+import './regles/gerer_regles_page.dart'; // Importez la page des règles générales
 
 class TypeDeSportPage extends StatefulWidget {
   @override
@@ -40,7 +41,7 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       MaterialPageRoute(builder: (context) => AddTypeDeSportPage()),
     ).then((value) {
       if (value == true) {
-        _fetchData(); // RAFRAICHIRR
+        _fetchData(); // Rafraîchir les données après l'ajout
       }
     });
   }
@@ -53,9 +54,18 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       ),
     ).then((value) {
       if (value == true) {
-        _fetchData(); // RAFRAICHIRRR LA PAGE
+        _fetchData(); // Rafraîchir les données après la mise à jour
       }
     });
+  }
+
+  void _openListeReglesGeneralesPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GererReglesPage(),
+      ),
+    );
   }
 
   @override
@@ -64,8 +74,6 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
       appBar: AppBar(
         title: Text('Types de Sport'),
         backgroundColor: Colors.teal,
-        
-        
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -99,15 +107,28 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
                       Icons.sports,
                       color: Colors.teal,
                     ),
-                    onTap: () => _openUpdateTypeDeSportPage(typeDeSport), // Ajoutez ceci pour la mise à jour
+                    onTap: () => _openUpdateTypeDeSportPage(typeDeSport), // Ouvrir la page de mise à jour
                   ),
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddTypeDeSportPage,
-        backgroundColor: Colors.teal,
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Bouton pour afficher les règles générales
+          FloatingActionButton(
+            onPressed: _openListeReglesGeneralesPage,
+            backgroundColor: Colors.blueAccent,
+            child: Icon(Icons.list),
+          ),
+          SizedBox(height: 16),
+          // Bouton pour ajouter un type de sport
+          FloatingActionButton(
+            onPressed: _openAddTypeDeSportPage,
+            backgroundColor: Colors.teal,
+            child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

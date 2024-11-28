@@ -61,7 +61,6 @@ class _GererReglesPageState extends State<GererReglesPage> {
                       regle.description,
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text("ID: ${regle.id}"),
                     trailing: IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () {

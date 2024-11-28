@@ -58,7 +58,7 @@ class RegleService {
  // Fetch rules for a specific TypeDeSport
   Future<List<Regle>> fetchReglesForTypeDeSport(int typeDeSportId) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/typeDeSport/$typeDeSportId'));
+      final response = await http.get(Uri.parse('http://192.168.1.107:8090/api/regles/typeDeSport/$typeDeSportId'));
 
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
@@ -70,4 +70,21 @@ class RegleService {
       throw Exception('Error fetching rules: $e');
     }
   }
+  // Fetch rules that are not associated with a specific TypeDeSport
+Future<List<Regle>> fetchReglesSansTypeDeSport(int typeDeSportId) async {
+  try {
+    final response = await http.get(Uri.parse('http://192.168.1.107:8090/api/regles/sans-typeDeSport/$typeDeSportId'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Regle.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load rules without typeDeSport');
+    }
+  } catch (e) {
+    throw Exception('Error fetching rules without typeDeSport: $e');
+  }
+}
+
+
 }

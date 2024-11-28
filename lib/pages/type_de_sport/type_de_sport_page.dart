@@ -112,23 +112,35 @@ class _TypeDeSportPageState extends State<TypeDeSportPage> {
                 );
               },
             ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Bouton pour afficher les règles générales
-          FloatingActionButton(
-            onPressed: _openListeReglesGeneralesPage,
-            backgroundColor: Colors.blueAccent,
-            child: Icon(Icons.list),
-          ),
-          SizedBox(height: 16),
-          // Bouton pour ajouter un type de sport
-          FloatingActionButton(
-            onPressed: _openAddTypeDeSportPage,
-            backgroundColor: Colors.teal,
-            child: Icon(Icons.add),
-          ),
-        ],
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [    // Bouton pour afficher les règles générales
+            ElevatedButton(
+              onPressed: _openListeReglesGeneralesPage,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black12,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: Text(
+                'Gérer Règles',
+                style: TextStyle(
+                  color: Colors.black, // Couleur du texte
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            // Bouton pour ajouter un type de sport
+            FloatingActionButton(
+              onPressed: _openAddTypeDeSportPage,
+              backgroundColor: Colors.teal,
+              child: Icon(Icons.add),
+            ),
+        
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/type_de_sport.dart';
+import '../models/regle.dart';
 
 class TypeDeSportService {
   final String baseUrl = 'http://192.168.1.107:8090/typesport';
@@ -52,5 +53,33 @@ Future<void> associerReglesAuTypeDeSport(int typeDeSportId, List<int> regleIds) 
     throw Exception('Erreur lors de l\'association des règles');
   }
 }
+Future<List<Regle>> fetchReglesForTypeDeSport(int typeDeSportId) async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/regles/typeDeSport/$typeDeSportId'));
 
+    // Ajoutez ce log pour afficher l'URL complète de la requête et la réponse brute
+    print('Requête URL: $baseUrl/regles/typeDeSport/$typeDeSportId');
+    print('Réponse de l\'API: ${response.body}'); // Affichez la réponse brute de l'API
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Regle.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load rules for typeDeSport');
+    }
+  } catch (e) {
+    print('Erreur dans la récupération des règles: $e');
+    throw Exception('Error fetching rules for typeDeSport: $e');
+  }
+}
+// Dissocier une règle d'un TypeDeSport spécifique
+  Future<void> dissocierRegleDuTypeDeSport(int typeDeSportId, int regleId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/$typeDeSportId/regle/$regleId'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors de la dissociation de la règle');
+    }
+  }
 }
